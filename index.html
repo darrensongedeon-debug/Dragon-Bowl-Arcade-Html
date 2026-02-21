@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dragon Bowl (Arcade Correct)</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Center everything perfectly */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 4:3 scaling container */
+#game-wrapper {
+  position: relative;
+}
+
+/* Canvas should NEVER control its own size */
+canvas {
+  display: block;
+  image-rendering: pixelated; /* keeps pixels sharp */
+}
+</style>
+</head>
+
+<body>
+
+<div id="game-wrapper">
+  <canvas id="canvas"></canvas>
+</div>
+
+<script src="es6-promise.js"></script>
+<script src="browserfs.min.js"></script>
+<script src="loader.js"></script>
+
+<script>
+const canvas = document.getElementById("canvas");
+const wrapper = document.getElementById("game-wrapper");
+
+/* Maintain proper 4:3 scaling */
+function resizeGame() {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  const targetRatio = 4 / 3;
+
+  let width = screenWidth;
+  let height = width / targetRatio;
+
+  if (height > screenHeight) {
+    height = screenHeight;
+    width = height * targetRatio;
+  }
+
+  wrapper.style.width = width + "px";
+  wrapper.style.height = height + "px";
+
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+}
+
+window.addEventListener("resize", resizeGame);
+resizeGame();
+
+/* Optional: click to enter fullscreen */
+canvas.addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  }
+});
+
+var emulator = new Emulator(
+  canvas,
+  null,
+  new JSMAMELoader(
+    JSMAMELoader.driver("drgnbowl"),
+    JSMAMELoader.nativeResolution(320, 240),
+    JSMAMELoader.scale(1),
+    JSMAMELoader.emulatorJS("mamegaiden.js"),
+    JSMAMELoader.mountFile(
+      "drgnbowl.zip",
+      JSMAMELoader.fetchFile("Game File", "drgnbowl.zip")
+    )
+  )
+);
+
+emulator.start({ waitAfterDownloading: true });
+</script>
+
+</body>
+</html>
